@@ -1,58 +1,58 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 import Header from "./Header";
 import Footer from "./Footer";
 import Login from "./Login";
-import {isEmpty} from "lodash";
-import { connect } from 'react-redux'
-import { withRouter } from "react-router-dom";
+import { isEmpty } from "lodash";
+import { connect } from "react-redux";
+import { showAlert } from "../alerts";
+import "../css/style.css";
+import * as actionCreator from "../store/actions/actions";
 
 class Layout extends Component {
-    handleRoute = (role) => {
-        console.log("handleroute", this.props);
-        if (role === 'admin' && this.props.isLogin) {
-            this.props.history.push('/admin')
-        } else if (role === 'user' && this.props.isLogin) {
-            this.props.history.push('/user')
-        }
+  handleRoute = role => {
+    if (role === "admin" && this.props.isLogin) {
+      showAlert('success', 'Admin Login Successfully.', 5);
+      this.props.history.push("/admin");
+    } else if (role === "user" && this.props.isLogin) {
+      showAlert('success', 'User Login Successfully.', 5);
+      this.props.history.push("/user");
     }
-    handleSubmit = async (userDetail = {}) => {
-        console.log("userDetail", userDetail);
-        if (!isEmpty(userDetail)) {
-            console.log("inside login");
-            this.props.getUserDetail(userDetail, this.handleRoute);
-            
-        } else {
-            console.log("login not successful");
-        }
+  };
+
+  handleSubmit = (userDetail = {}) => {
+    if (!isEmpty(userDetail)) {
+      this.props.getUserDetail(userDetail, this.handleRoute);
+    } else {
+      // console.log("login not successful");
+      showAlert('error', 'Admin Login Successfully.', 5);
+
     }
-    render() {
-        console.log("layout props", this.props);
-        return (
-            <div className="Layout">
-                <Header />
-                <Login login={this.handleSubmit} />
-                <Footer />
-            </div>
-        );
-    }
+  };
+
+  render() {
+    return (
+      <div className="Layout">
+        <Header />
+        <Login login={this.handleSubmit} />
+        <Footer />
+      </div>
+    );
+  }
 }
 
-const mapStateToProps = (state) => {
-    console.log("mapstatetoprops", {...state});
-    return {
-        userDetail: state.userDetail,
-        isLogin: state.isLogin,
+const mapStateToProps = state => {
+  return {
+    userDetail: state.loginReducer.userDetail,
+    isLogin: state.loginReducer.isLogin
+  };
+};
+
+const mapDispatchToProps = dispatch => {
+  return {
+    getUserDetail: (userDetail, callback) => {
+      dispatch(actionCreator.getUserDetail(userDetail, callback));
     }
-}
-const mapDispachToProps = (dispach) => {
-    return {
-        getUserDetail : async ( userDetail, callback) => {
-        console.log("ravi testing", userDetail, callback);
-        await dispach({ type: "login", payload: {userDetail, callback }})
-        if (callback) {
-            callback();
-        }
-        }
-    }
-}
-export default connect(mapStateToProps, mapDispachToProps)(Layout);
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Layout);
